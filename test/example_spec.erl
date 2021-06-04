@@ -1,6 +1,6 @@
 -module(example_spec).
 
--behaviour(borges_spec).
+-behaviour(borges_spec_behaviour).
 
 -export([name/0,
          init/0,

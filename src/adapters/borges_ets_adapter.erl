@@ -4,7 +4,7 @@
          store/3,
          fetch/2]).
 
--behaviour(borges_adapter).
+-behaviour(borges_adapter_behaviour).
 
 % options according to https://erlang.org/doc/man/ets.html#new-2
 -type storage_adapter_config() ::

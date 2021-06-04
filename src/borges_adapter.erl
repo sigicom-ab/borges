@@ -5,16 +5,6 @@
          store/3,
          store_subset/4]).
 
-% These depend on
--type key() :: term().
--type value() :: term().
-%-type storage_adapter_config() :: term().
--type storage_config() :: borges_spec_behaviour:storage_config().
-
--callback name() -> atom().
--callback store(key(), value(), storage_config()) -> ok | {error, term()}.
--callback fetch(key(), storage_config()) -> {ok, term()} | {error, term()}.
-
 store(ModelName, Input, Term) ->
     KeyFun = borges_spec:get_key_fun(ModelName),
     StoreIdentifier = KeyFun(Input),
