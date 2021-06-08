@@ -1,6 +1,7 @@
 -module(borges_adapter).
 
--export([get/2,
+-export([remove/2,
+         get/2,
          get_subset/3,
          store/3,
          store_subset/4]).
@@ -34,3 +35,12 @@ get_subset(ModelName, SubsetName, Input) ->
 
 internal_get(StoreIdentifier, #{storage_adapter := StorageAdapter} = Config) ->
     StorageAdapter:fetch(StoreIdentifier, Config).
+
+remove(ModelName, Input) ->
+    KeyFun = borges_spec:get_key_fun(ModelName),
+    StoreIdentifier = KeyFun(Input),
+    Config = borges_spec:get_storage_config(ModelName),
+    internal_remove(StoreIdentifier, Config).
+
+internal_remove(StorageIdentifier, #{storage_adapter := StorageAdapter} = Config) ->
+    StorageAdapter:remove(StorageIdentifier, Config).

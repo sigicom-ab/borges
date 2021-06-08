@@ -30,7 +30,7 @@ fetch(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
         _ -> {ok, []}
     end.
 
-remove(Key,  #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
+remove(Key,  #{storage_adapter_config := StorageAdapterConfig} = Config) ->
     TableName = maps:get(name, StorageAdapterConfig),
     ets:delete(TableName, Key),
     ok.

@@ -24,6 +24,7 @@
       data_prep := fun((main_obj_data()) -> subset_data()),
       subset_keys_fun := fun((main_obj_data()) -> [ident()]),
       extend := fun((atom(), subset_data(), ident()) -> subset_obj_data()),
+      reduce := fun((atom(), subset_data(), ident()) -> subset_obj_data()),
       storage_config := storage_config()}.
 -type storage_config() ::
     #{key_fun := fun((ident()) -> key()),
