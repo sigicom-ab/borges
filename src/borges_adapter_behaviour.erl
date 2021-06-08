@@ -8,3 +8,4 @@
 -callback name() -> atom().
 -callback store(key(), value(), storage_config()) -> ok | {error, term()}.
 -callback fetch(key(), storage_config()) -> {ok, term()} | {error, term()}.
+-callback remove(key(), storage_config()) -> ok.
