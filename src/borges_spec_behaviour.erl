@@ -6,8 +6,6 @@
 -optional_callbacks([init/0,
                      terminate/0]).
 
--export_type([storage_config/0]).
-
 -callback name() -> atom().
 -callback main_obj() -> storage_config(). % TODO: main_storage
 -callback subsets() -> [subset_config()].
@@ -29,3 +27,8 @@
     #{key_fun := fun((ident()) -> key()),
       storage_adapter := atom(),
       storage_adapter_config => term()}.
+
+-export_type([storage_config/0,
+              ident/0,
+              main_obj_data/0,
+              subset_config/0]).
