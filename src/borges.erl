@@ -11,8 +11,6 @@
          delete/2,
          add_id/2]).
 
-                   % should we really have this
-
 register(ModelSpecModule) ->
     ok = borges_spec:validate(ModelSpecModule),
     Name = ModelSpecModule:name(),
@@ -49,7 +47,14 @@ post(Name, Term) ->
     TermWithId = add_id(Name, Term),
     store(Name, TermWithId).
 
-delete(Name, Term) -> ok.
+delete(Name, Id) ->
+    case borges_adapter:get(Name, Id) of
+        {ok, Obj} ->
+            borges_adapter:remove(Name, Id),
+            borges_handler:remove(Name, Obj);
+        _ ->
+            logger:info("Attempt to remove non-existing object with id ~p. Doing nothing", [Id])
+    end.
 
 add_id(Name, Term) -> ok.
 

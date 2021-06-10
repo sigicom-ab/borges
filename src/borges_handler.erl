@@ -4,6 +4,7 @@
 
 -export([start_link/1,
          handle_event/2,
+         remove/2,
          ensure_consistency/1,
          ensure_consistency/2]).
 -export([init/1,
@@ -20,6 +21,10 @@ start_link(Name) -> gen_server:start_link(?MODULE, [Name], []).
 handle_event(Name, Obj) ->
     Pid = borges_spec:get_handler_pid(Name),
     gen_server:cast(Pid, {event, Obj}).
+
+remove(Name, Obj) ->
+    Pid = borges_spec:get_handler_pid(Name),
+    gen_server:cast(Pid, {remove, Obj}).
 
 ensure_consistency(Name) ->
     Pid = borges_spec:get_handler_pid(Name),
@@ -41,7 +46,15 @@ handle_cast({event, Obj}, #state{name = ModelName} = State) ->
     Subsets =
         maps:values(
             borges_spec:get_subsets(ModelName)),
-    [maybe_add_to_subset(ModelName, Obj, Subset) || Subset <- Subsets],
+    Function = fun subset_store/5,
+    [maybe_apply_to_subset(Function, ModelName, Obj, Subset) || Subset <- Subsets],
+    {noreply, State};
+handle_cast({remove, Obj}, #state{name = ModelName} = State) ->
+    Subsets =
+        maps:values(
+            borges_spec:get_subsets(ModelName)),
+    Function = fun subset_remove/5,
+    [maybe_apply_to_subset(Function, ModelName, Obj, Subset) || Subset <- Subsets],
     {noreply, State};
 handle_cast(Msg, State) ->
     logger:notice("out of bounds cast ~p", [Msg]),
@@ -57,7 +70,7 @@ terminate(_Reason, #state{name = Name}) ->
 
 code_change(_OldVsn, State, _Extra) -> {ok, State}.
 
-maybe_add_to_subset(ModelName, Obj, SubsetConfig) ->
+maybe_apply_to_subset(F, ModelName, Obj, SubsetConfig) ->
     #{name := SubsetName,
       is_related := IsRelated,
       subset_keys_fun := SubsetKeysFun} =
@@ -68,7 +81,7 @@ maybe_add_to_subset(ModelName, Obj, SubsetConfig) ->
             PreppedData = maybe_prep_data(Obj, SubsetConfig),
             Inputs = SubsetKeysFun(Obj),
             % Store data at key
-            [subset_store(ModelName, SubsetName, Input, PreppedData, SubsetConfig)
+            [F(ModelName, SubsetName, Input, PreppedData, SubsetConfig)
              || Input <- Inputs],
             ok
     end.
@@ -76,6 +89,12 @@ maybe_add_to_subset(ModelName, Obj, SubsetConfig) ->
 subset_store(ModelName, SubsetName, Input, Data, SubsetConfig) ->
     #{extend := ExtendFun} = SubsetConfig,
     Obj = ExtendFun(SubsetName, Data, Input),
+    borges_adapter:store_subset(ModelName, SubsetName, Input, Obj).
+
+
+subset_remove(ModelName, SubsetName, Input, Data, SubsetConfig) ->
+    #{reduce := ReduceFun} = SubsetConfig,
+    Obj = ReduceFun(SubsetName, Data, Input),
     borges_adapter:store_subset(ModelName, SubsetName, Input, Obj).
 
 maybe_prep_data(Obj, #{data_prep := F}) -> F(Obj);

@@ -51,15 +51,8 @@ maybe_start_handler(Name) ->
 maybe_stop_handler(Name) ->
     case whereis(?SERVER) of
         undefined -> ok;
-        _Pid -> stop_handler(Name)
-    end.
-
-stop_handler(Name) ->
-    case supervisor:terminate_child(?SERVER, {borges_handler, Name}) of
-        ok -> supervisor:delete_child(?SERVER, {borges_handler, Name});
-        Err ->
-            logger:notice("error when terminating child: ~p", [Err]),
+        _Pid ->
+            supervisor:terminate_child(?SERVER, {borges_handler, Name}),
             ok
     end.
 
-%% internal functions

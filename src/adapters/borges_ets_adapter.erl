@@ -2,7 +2,8 @@
 
 -export([name/0,
          store/3,
-         fetch/2]).
+         fetch/2,
+         remove/2]).
 
 -behaviour(borges_adapter_behaviour).
 
@@ -28,3 +29,8 @@ fetch(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
         [{_, Data}] -> {ok, Data};
         _ -> {ok, []}
     end.
+
+remove(Key,  #{storage_adapter_config := StorageAdapterConfig} = Config) ->
+    TableName = maps:get(name, StorageAdapterConfig),
+    ets:delete(TableName, Key),
+    ok.
