@@ -1,14 +1,14 @@
 -module(example_spec).
 
--behaviour(borges_spec_behaviour).
+-behaviour(borges_spec).
 
 -export([name/0,
          init/0,
          storage_identifier/1,
-         main_obj/0,
+         main_storage/0,
          subsets/0]).
 
- %% TODO: This could be called "Model"
+%% TODO: This could be called "Model"
 
 name() -> project_storage.
 
@@ -43,7 +43,7 @@ subsets() ->
                  #{name => user_projects,
                    options => [set, named_table, public]}}}].
 
-main_obj() ->
+main_storage() ->
     #{key_fun => fun storage_identifier_to_key/1,
       storage_adapter => borges_ets_adapter,
       storage_adapter_config =>
@@ -80,12 +80,10 @@ remove_from_list(SubsetName, Data, Input) ->
     {ok, List} = borges:get_subset(name(), SubsetName, Input),
     remove_subset_obj(Data, List).
 
-remove_subset_obj(_Data, []) ->
-    [];
+remove_subset_obj(_Data, []) -> [];
 remove_subset_obj(#{project_id := ProjectID}, [#{project_id := ProjectID} | Rest]) ->
     Rest;
-remove_subset_obj(Data, [D|Rest]) ->
-    [D | remove_subset_obj(Data, Rest)].
+remove_subset_obj(Data, [D | Rest]) -> [D | remove_subset_obj(Data, Rest)].
 
 storage_identifier_to_key(N) ->
     BinN = integer_to_binary(N),

@@ -5,18 +5,17 @@
          fetch/2,
          remove/2]).
 
--behaviour(borges_adapter_behaviour).
+-behaviour(borges_adapter).
 
-% options according to https://erlang.org/doc/man/ets.html#new-2
 -type storage_adapter_config() ::
-    #{table => atom(),
-      options => term()}.
+    #{storage_adapter_config := #{table => atom()},
+      _ => _}.
 -type key() :: term().
 -type data() :: term().
 
 name() -> borges_ets_adapter.
 
-%-spec store(key(), data(), storage_adapter_config()) -> true.
+-spec store(key(), data(), storage_adapter_config()) -> ok.
 store(Key, Data, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
     TableName = maps:get(name, StorageAdapterConfig),
     ets:insert(TableName, {Key, Data}),
@@ -30,7 +29,7 @@ fetch(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
         _ -> {ok, []}
     end.
 
-remove(Key,  #{storage_adapter_config := StorageAdapterConfig} = Config) ->
+remove(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
     TableName = maps:get(name, StorageAdapterConfig),
     ets:delete(TableName, Key),
     ok.

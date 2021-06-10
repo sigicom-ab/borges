@@ -18,8 +18,8 @@
 % Name of a subset, i.e. what is returned by running name/0 from a subset_config
 -type subset_name() :: atom().
 % Object identifier
--type ident() :: borges_spec_behaviour:ident().
--type main_obj_data() :: borges_spec_behaviour:main_obj_data().
+-type ident() :: borges_spec:ident().
+-type main_storage_data() :: borges_spec:main_storage_data().
 
 -spec register(spec_module_name()) -> ok.
 register(ModelSpecModule) ->
@@ -39,41 +39,44 @@ unregister(StorageSpec) ->
     persistent_term:erase({?MODULE, Name}),
     ok.
 
--spec get(spec_name(), ident()) -> {ok, main_obj_data()} | {ok, []}.
+-spec get(spec_name(), ident()) -> {ok, main_storage_data()} | {ok, []}.
 get(Name, Id) -> borges_adapter:get(Name, Id).
 
 get_subset(Name, SubsetName) ->
     % get data belonging to subset
     get_subset(Name, SubsetName, []).
 
--spec get_subset(spec_name(), subset_name(), ident()) -> {ok, main_obj_data()} | {ok, []}.
+-spec get_subset(spec_name(), subset_name(), ident()) ->
+                    {ok, main_storage_data()} | {ok, []}.
 get_subset(Name, SubsetName, Id) -> borges_adapter:get_subset(Name, SubsetName, Id).
 
--spec store(spec_name(), main_obj_data()) -> ok.
+-spec store(spec_name(), main_storage_data()) -> ok.
 store(Name, Term) ->
     borges_handler:handle_event(Name, Term),
     IdentifierFun = borges_spec:get_identifier_fun(Name),
     Input = IdentifierFun(Term),
     borges_adapter:store(Name, Input, Term).
 
--spec put(spec_name(), main_obj_data()) -> ok.
+-spec put(spec_name(), main_storage_data()) -> ok.
 put(Name, Term) -> store(Name, Term).
 
--spec post(spec_name(), main_obj_data()) -> ok.
+-spec post(spec_name(), main_storage_data()) -> ok.
 post(Name, Term) ->
     TermWithId = add_id(Name, Term),
     store(Name, TermWithId).
 
+-spec delete(spec_name(), ident()) -> ok.
 delete(Name, Id) ->
     case borges_adapter:get(Name, Id) of
         {ok, Obj} ->
             borges_adapter:remove(Name, Id),
             borges_handler:remove(Name, Obj);
-        _ ->
-            logger:info("Attempt to remove non-existing object with id ~p. Doing nothing", [Id])
+        _ -> logger:info("Attempt to remove non-existing object with id ~p. Doing nothing", [Id])
     end.
 
-add_id(Name, Term) -> ok.
+add_id(_Name, Term) ->
+    % TODO
+    Term.
 
 maybe_init(StorageSpec) ->
     case erlang:function_exported(StorageSpec, init, 0) of

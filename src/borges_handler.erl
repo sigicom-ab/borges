@@ -81,8 +81,7 @@ maybe_apply_to_subset(F, ModelName, Obj, SubsetConfig) ->
             PreppedData = maybe_prep_data(Obj, SubsetConfig),
             Inputs = SubsetKeysFun(Obj),
             % Store data at key
-            [F(ModelName, SubsetName, Input, PreppedData, SubsetConfig)
-             || Input <- Inputs],
+            [F(ModelName, SubsetName, Input, PreppedData, SubsetConfig) || Input <- Inputs],
             ok
     end.
 
@@ -90,7 +89,6 @@ subset_store(ModelName, SubsetName, Input, Data, SubsetConfig) ->
     #{extend := ExtendFun} = SubsetConfig,
     Obj = ExtendFun(SubsetName, Data, Input),
     borges_adapter:store_subset(ModelName, SubsetName, Input, Obj).
-
 
 subset_remove(ModelName, SubsetName, Input, Data, SubsetConfig) ->
     #{reduce := ReduceFun} = SubsetConfig,

@@ -13,27 +13,55 @@
          get_storage_config/1,
          get_subset_storage_config/2]).
 
-% Name of module containing spec
 -type spec_module_name() :: atom().
-% Name of spec, i.e. what is returned by running name/0 in the spec module
 -type spec_name() :: atom().
-% Name of a subset, i.e. what is returned by running name/0 from a subset_config
 -type subset_name() :: atom().
--type storage_config() :: borges_spec_behaviour:storage_config().
--type subset_map() ::
-    map().  % Format is #{ subset_name => borges_spec_behaviour:subset_config()},
+-type subset_map() :: #{subset_name() => subset_config()}.
 -type spec() ::
     #{name => atom(),
-      main_storage := borges_spec_behaviour:storage_config(),
+      main_storage := storage_config(),
       handler_pid => undefined | pid(),
       subsets => subset_map(),
       module => spec_module_name()}.
+-type subset_data() :: term().
+-type subset_obj_data() :: term() | [subset_data()].
+-type main_storage_data() :: term().
+-type key() :: term().
+-type ident() :: term().
+-type subset_config() ::
+    #{name => subset_name(),
+      is_related := fun((main_storage_data()) -> boolean()),
+      data_prep := fun((main_storage_data()) -> subset_data()),
+      subset_keys_fun := fun((main_storage_data()) -> [ident()]),
+      extend := fun((subset_name(), subset_data(), ident()) -> subset_obj_data()),
+      reduce := fun((subset_name(), subset_data(), ident()) -> subset_obj_data()),
+      storage_config := storage_config()}.
+-type storage_config() ::
+    #{key_fun := fun((ident()) -> key()),
+      storage_adapter := atom(),
+      storage_adapter_config => term()}.
+
+-export_type([storage_config/0,
+              ident/0,
+              main_storage_data/0,
+              subset_config/0]).
+
+% Behaviour callbacks
+-callback init() -> ok.
+-callback terminate() -> ok.
+-callback name() -> spec_name().
+-callback main_storage() -> storage_config().
+-callback subsets() -> [subset_config()].
+-callback storage_identifier(main_storage_data()) -> ident().
+
+-optional_callbacks([init/0,
+                     terminate/0]).
 
 -spec make_internal_specification_structure(spec_module_name()) -> spec().
 make_internal_specification_structure(Module) ->
     StorageName = Module:name(),
     Subsets = Module:subsets(),
-    MainStorage = Module:main_obj(),
+    MainStorage = Module:main_storage(),
     SubsetsMap = maps:from_list([{Name, Def} || #{name := Name} = Def <- Subsets]),
     #{name => StorageName,
       main_storage => MainStorage,
@@ -55,8 +83,7 @@ get_spec(Name) ->
     PTKey = {?MODULE, Name},
     persistent_term:get(PTKey).
 
--spec get_subset_spec(spec_name(), subset_name()) ->
-                         borges_spec_behaviour:subset_config().
+-spec get_subset_spec(spec_name(), subset_name()) -> subset_config().
 get_subset_spec(Name, SubsetName) ->
     Spec = get_spec(Name),
     #{module := Module} = Spec,
@@ -99,17 +126,17 @@ set_handler_pid(Name, Pid) ->
     Spec1 = Spec0#{handler_pid => Pid},
     ok = persistent_term:put(PTKey, Spec1).
 
--spec get_key_fun(spec_name()) -> term(). % TODO
+-spec get_key_fun(spec_name()) -> function().
 get_key_fun(Name) ->
     #{key_fun := KeyFun} = get_storage_config(Name),
     KeyFun.
 
--spec get_key_fun(spec_name(), subset_name()) -> term(). % TODO
+-spec get_key_fun(spec_name(), subset_name()) -> function().
 get_key_fun(Name, SubsetName) ->
     #{key_fun := KeyFun} = get_subset_storage_config(Name, SubsetName),
     KeyFun.
 
--spec get_identifier_fun(spec_name()) -> term(). % TODO
+-spec get_identifier_fun(spec_name()) -> function().
 get_identifier_fun(Name) ->
     #{module := Module} = get_spec(Name),
     fun Module:storage_identifier/1.

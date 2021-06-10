@@ -55,4 +55,3 @@ maybe_stop_handler(Name) ->
             supervisor:terminate_child(?SERVER, {borges_handler, Name}),
             ok
     end.
-

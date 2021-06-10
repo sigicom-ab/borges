@@ -1,7 +1,9 @@
 -module(borges_tests).
 
 -export([]).
+
 -define(SLEEPTIME, 30).
+
 -include_lib("eunit/include/eunit.hrl").
 
 basic_test() ->
@@ -41,7 +43,6 @@ basic_test() ->
     ?assertEqual(length(User2Subset), 1),
     {ok, CompanySubsetAgain} = borges:get_subset(project_storage, company_projects, 1),
     ?assertEqual(length(CompanySubsetAgain), 1).
-
 
 example_data() ->
     [#{project_id => N,

@@ -1,5 +1,15 @@
 -module(borges_adapter).
 
+% These depend on
+-type key() :: term().
+-type value() :: term().
+-type storage_config() :: borges_spec:storage_config().
+
+-callback name() -> atom().
+-callback store(key(), value(), storage_config()) -> ok | {error, term()}.
+-callback fetch(key(), storage_config()) -> {ok, term()} | {error, term()}.
+-callback remove(key(), storage_config()) -> ok.
+
 -export([remove/2,
          get/2,
          get_subset/3,
