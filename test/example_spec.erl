@@ -23,6 +23,7 @@ subsets() ->
        data_prep => fun prep_project/1,
        subset_keys_fun => fun company_project_key_gen/1,
        extend => fun add_to_list/3,
+       reduce => fun remove_from_list/3,
        storage_config =>
            #{key_fun => fun get_company_project_key/1,
              storage_adapter => borges_ets_adapter,
@@ -34,6 +35,7 @@ subsets() ->
        data_prep => fun prep_project/1,
        subset_keys_fun => fun user_project_key_gen/1,
        extend => fun add_to_list/3,
+       reduce => fun remove_from_list/3,
        storage_config =>
            #{key_fun => fun get_user_project_key/1,
              storage_adapter => borges_ets_adapter,
@@ -73,6 +75,17 @@ get_company_project_key(N) ->
 add_to_list(SubsetName, Data, Input) ->
     {ok, List} = borges:get_subset(name(), SubsetName, Input),
     [Data | List].
+
+remove_from_list(SubsetName, Data, Input) ->
+    {ok, List} = borges:get_subset(name(), SubsetName, Input),
+    remove_subset_obj(Data, List).
+
+remove_subset_obj(_Data, []) ->
+    [];
+remove_subset_obj(#{project_id := ProjectID}, [#{project_id := ProjectID} | Rest]) ->
+    Rest;
+remove_subset_obj(Data, [D|Rest]) ->
+    [D | remove_subset_obj(Data, Rest)].
 
 storage_identifier_to_key(N) ->
     BinN = integer_to_binary(N),
