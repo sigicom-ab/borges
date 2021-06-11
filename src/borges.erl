@@ -33,11 +33,11 @@ register(ModelSpecModule) ->
 
 %% Note: If you change name and hot-reload this would break badly
 -spec unregister(spec_module_name()) -> ok.
-unregister(StorageSpec) ->
-    Name = StorageSpec:name(),
+unregister(ModuleSpecModule) ->
+    Name = ModuleSpecModule:name(),
     ok = borges_handler_sup:maybe_stop_handler(Name),
-    persistent_term:erase({?MODULE, Name}),
-    ok.
+    maybe_terminate(ModuleSpecModule),
+    borges_spec:delete(Name).
 
 -spec get(spec_name(), ident()) -> {ok, main_storage_data()} | {ok, []}.
 get(Name, Id) -> borges_adapter:get(Name, Id).
@@ -78,8 +78,14 @@ add_id(_Name, Term) ->
     % TODO
     Term.
 
-maybe_init(StorageSpec) ->
-    case erlang:function_exported(StorageSpec, init, 0) of
-        true -> StorageSpec:init();
+maybe_init(ModuleSpecModule) ->
+    case erlang:function_exported(ModuleSpecModule, init, 0) of
+        true -> ModuleSpecModule:init();
+        false -> ok
+    end.
+
+maybe_terminate(ModuleSpecModule) ->
+    case erlang:function_exported(ModuleSpecModule, terminate, 0) of
+        true -> ModuleSpecModule:terminate();
         false -> ok
     end.

@@ -16,20 +16,20 @@
 name() -> borges_ets_adapter.
 
 -spec store(key(), data(), storage_adapter_config()) -> ok.
-store(Key, Data, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
+store(Key, Data, #{storage_adapter_config := StorageAdapterConfig}) ->
     TableName = maps:get(name, StorageAdapterConfig),
     ets:insert(TableName, {Key, Data}),
     ok.
 
 %-spec fetch(key(), storage_adapter_config()) -> {ok, term()}.
-fetch(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
+fetch(Key, #{storage_adapter_config := StorageAdapterConfig}) ->
     TableName = maps:get(name, StorageAdapterConfig),
     case ets:lookup(TableName, Key) of
         [{_, Data}] -> {ok, Data};
         _ -> {ok, []}
     end.
 
-remove(Key, #{storage_adapter_config := StorageAdapterConfig} = _Config) ->
+remove(Key, #{storage_adapter_config := StorageAdapterConfig}) ->
     TableName = maps:get(name, StorageAdapterConfig),
     ets:delete(TableName, Key),
     ok.

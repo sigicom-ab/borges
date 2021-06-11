@@ -4,6 +4,7 @@
 
 -export([name/0,
          init/0,
+         terminate/0,
          storage_identifier/1,
          main_storage/0,
          subsets/0]).
@@ -16,6 +17,15 @@ init() ->
     ets:new(user_projects, [set, named_table, public]),
     ets:new(company_projects, [set, named_table, public]),
     ets:new(projects, [set, named_table, public]).
+
+terminate() ->
+    [delete_ets_table(TableName) || TableName <- [user_projects, company_projects, projects]].
+
+delete_ets_table(Name) ->
+    case ets:whereis(Name) of
+        undefined -> ok;
+        Tid -> ets:delete(Tid)
+    end.
 
 subsets() ->
     [#{name => company_projects,

@@ -3,6 +3,7 @@
 -export([get_spec/1,
          validate/1,
          create/2,
+         delete/1,
          get_handler_pid/1,
          set_handler_pid/2,
          get_key_fun/1,
@@ -78,26 +79,22 @@ create(Name, Spec) ->
     undefined = persistent_term:get(PTKey, undefined),
     ok = persistent_term:put(PTKey, Spec).
 
--spec get_spec(spec_name()) -> spec().
+-spec delete(spec_name()) -> ok.
+delete(Name) ->
+    PTKey = {?MODULE, Name},
+    % ignore false/true?
+    persistent_term:erase(PTKey),
+    ok.
+
+-spec get_spec(spec_name()) -> spec() | not_found.
 get_spec(Name) ->
     PTKey = {?MODULE, Name},
-    persistent_term:get(PTKey).
+    persistent_term:get(PTKey, not_found).
 
--spec get_subset_spec(spec_name(), subset_name()) -> subset_config().
+-spec get_subset_spec(spec_name(), subset_name()) -> subset_config() | not_found.
 get_subset_spec(Name, SubsetName) ->
-    Spec = get_spec(Name),
-    #{module := Module} = Spec,
-    AllSubsets = Module:subsets(),
-    find_subset(AllSubsets, SubsetName).
-
-% TODO: rewrite as map
-find_subset([], _SubsetName) -> undefined;
-find_subset([Subset | Rest], SubsetName) ->
-    SubsetName2 = maps:get(name, Subset),
-    case SubsetName == SubsetName2 of
-        true -> Subset;
-        false -> find_subset(Rest, SubsetName)
-    end.
+    AllSubsets = get_subsets(Name),
+    maps:get(SubsetName, AllSubsets, not_found).
 
 -spec get_subsets(spec_name()) -> subset_map().
 get_subsets(Name) ->
