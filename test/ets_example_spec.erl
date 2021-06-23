@@ -1,4 +1,4 @@
--module(example_spec).
+-module(ets_example_spec).
 
 -behaviour(borges_spec).
 
@@ -11,7 +11,7 @@
 
 %% TODO: This could be called "Model"
 
-name() -> project_storage.
+name() -> projects.
 
 init() ->
     ets:new(user_projects, [set, named_table, public]),
@@ -83,8 +83,12 @@ get_company_project_key(N) ->
     <<"company_", BinN/binary, "_projects">>.
 
 add_to_list(SubsetName, Data, Input) ->
-    {ok, List} = borges:get_subset(name(), SubsetName, Input),
-    [Data | List].
+    case borges:get_subset(name(), SubsetName, Input) of
+        {ok, not_found} ->
+            [Data];
+        {ok, List} ->
+            [Data | List]
+    end.
 
 remove_from_list(SubsetName, Data, Input) ->
     {ok, List} = borges:get_subset(name(), SubsetName, Input),

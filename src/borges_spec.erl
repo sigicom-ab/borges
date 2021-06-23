@@ -1,6 +1,7 @@
 -module(borges_spec).
 
 -export([get_spec/1,
+         get_subset_spec/2,
          validate/1,
          create/2,
          delete/1,
@@ -24,6 +25,8 @@
       handler_pid => undefined | pid(),
       subsets => subset_map(),
       module => spec_module_name()}.
+
+% This needs to be some data structure which behaves as a set, i.e. set, map with unique keys
 -type subset_data() :: term().
 -type subset_obj_data() :: term() | [subset_data()].
 -type main_storage_data() :: term().
@@ -34,7 +37,7 @@
       is_related := fun((main_storage_data()) -> boolean()),
       data_prep := fun((main_storage_data()) -> subset_data()),
       subset_keys_fun := fun((main_storage_data()) -> [ident()]),
-      extend := fun((subset_name(), subset_data(), ident()) -> subset_obj_data()),
+      extend := fun((subset_name(), subset_data(), ident()) -> subset_obj_data()),  %todo: add as default with optional override?
       reduce := fun((subset_name(), subset_data(), ident()) -> subset_obj_data()),
       storage_config := storage_config()}.
 -type storage_config() ::
