@@ -1,7 +1,6 @@
 -module(borges_ets_adapter).
 
--export([
-         keys/1,
+-export([keys/1,
          store/3,
          fetch/2,
          remove/2]).
@@ -35,5 +34,7 @@ remove(Key, #{storage_adapter_config := StorageAdapterConfig}) ->
 
 keys(#{storage_adapter_config := StorageAdapterConfig}) ->
     TableName = maps:get(name, StorageAdapterConfig),
-    Keys = lists:flatten(ets:match(TableName, {'$1', '_'})),
+    Keys =
+        lists:flatten(
+            ets:match(TableName, {'$1', '_'})),
     {ok, Keys}.

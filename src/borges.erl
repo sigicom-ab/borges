@@ -50,10 +50,8 @@ get_subset(Name, SubsetName) ->
                     {ok, main_storage_data()} | {ok, []}.
 get_subset(Name, SubsetName, Id) ->
     case borges_spec:get_subset_spec(Name, SubsetName) of
-        not_found ->
-            {error, subset_not_defined};
-        _ ->
-            borges_adapter:get_subset(Name, SubsetName, Id)
+        not_found -> {error, subset_not_defined};
+        _ -> borges_adapter:get_subset(Name, SubsetName, Id)
     end.
 
 -spec store(spec_name(), main_storage_data()) -> ok.
@@ -65,8 +63,7 @@ store(Name, Term) ->
     borges_adapter:store(Name, Input, Term).
 
 -spec put(spec_name(), main_storage_data()) -> ok.
-put(Name, Term) ->
-    store(Name, Term).
+put(Name, Term) -> store(Name, Term).
 
 -spec post(spec_name(), main_storage_data()) -> ok.
 post(Name, Term) ->

@@ -28,8 +28,8 @@ basic(SpecName) ->
     {ok, User1Subset} = borges:get_subset(projects, user_projects, 1),
     {ok, User2Subset} = borges:get_subset(projects, user_projects, 2),
     ?assertEqual(length(CompanySubset), 2),
-    ?assertEqual(length(User1Subset), 1),
-    ?assertEqual(length(User2Subset), 2),
+    ?assertEqual(sets:size(User1Subset), 1),
+    ?assertEqual(sets:size(User2Subset), 2),
 
     % Delete project 1
     borges:delete(projects, 1),
@@ -44,8 +44,8 @@ basic(SpecName) ->
     {ok, User2SubsetAgain} = borges:get_subset(projects, user_projects, 2),
     {ok, CompanySubsetAgain} = borges:get_subset(projects, company_projects, 1),
     ?assertEqual(length(CompanySubsetAgain), 1),
-    ?assertEqual(length(User1SubsetAgain), 0),
-    ?assertEqual(length(User2SubsetAgain), 1),
+    ?assertEqual(sets:size(User1SubsetAgain), 0),
+    ?assertEqual(sets:size(User2SubsetAgain), 1),
     borges:unregister(SpecName).
 
 basic_test() ->
@@ -70,11 +70,11 @@ update(SpecName) ->
     % Fetch company and user subsets and check that they have the right number of objects
     {ok, User1Subset0} = borges:get_subset(projects, user_projects, 1),
     {ok, User2Subset0} = borges:get_subset(projects, user_projects, 2),
-    ?assertEqual(length(User1Subset0), 1),
-    ?assertEqual(length(User2Subset0), 1),
+    ?assertEqual(sets:size(User1Subset0), 1),
+    ?assertEqual(sets:size(User2Subset0), 1),
 
     % we update the users of project 1
-    borges:put(projects, Project#{user_ids => [2,3]}),
+    borges:put(projects, Project#{user_ids => [2, 3]}),
     timer:sleep(?SLEEPTIME),
 
     % Fetch company and user subsets and check that they have the right number of objects
@@ -83,9 +83,9 @@ update(SpecName) ->
     {ok, User3Subset} = borges:get_subset(projects, user_projects, 3),
 
     % project should be gone for user 1, unchanged for user 2 and added for user 3
-    ?assertEqual(length(User1Subset), 0),
-    ?assertEqual(length(User2Subset), 1),
-    ?assertEqual(length(User3Subset), 1),
+    ?assertEqual(sets:size(User1Subset), 0),
+    ?assertEqual(sets:size(User2Subset), 1),
+    ?assertEqual(sets:size(User3Subset), 1),
     borges:unregister(SpecName).
 
 update_test() ->
