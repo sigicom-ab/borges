@@ -47,8 +47,10 @@
       storage_adapter := atom(),
       storage_adapter_config => term()}.
 
--export_type([storage_config/0,
+-export_type([spec_name/0,
+              storage_config/0,
               ident/0,
+              key/0,
               main_storage_data/0,
               subset_config/0]).
 
